@@ -797,9 +797,13 @@ export default function App() {
   const [loading, setLoading] = useState(false);
   const [showResult, setShowResult] = useState(false);
   const [loadingMessage, setLoadingMessage] = useState(0);
+  const [errorMessage, setErrorMessage] = useState('');
   const requestingRef = useRef(false);
 
-  const isGitHubInput = /^https?:\/\/(www\.)?github\.com\/[^/?#]+\/[^/?#]+/.test(productInfo.trim());
+  const normalizedInput = productInfo.trim().replace(/^\/\//, 'https://');
+  const hasProtocol = /^https?:\/\//i.test(normalizedInput);
+  const repoUrlCandidate = hasProtocol ? normalizedInput : `https://${normalizedInput}`;
+  const isGitHubInput = /^https?:\/\/(www\.)?github\.com\/[^/?#]+\/[^/?#]+/.test(repoUrlCandidate);
   const loadingMessages = [
     '正在通过 API 窥探仓库因果...',
     '正在解析代码提交频率的五行属性...',
@@ -813,9 +817,16 @@ export default function App() {
   }, [loading]);
 
   const startDivination = async () => {
+    setErrorMessage('');
     const trimmed = productInfo.trim();
-    if (!trimmed) return alert('请输入 GitHub 仓库地址');
-    if (!isGitHubInput) return alert('仅支持 GitHub 仓库地址占卜，请输入有效的 URL，如 https://github.com/owner/repo');
+    if (!trimmed) {
+      setErrorMessage('请输入 GitHub 仓库地址');
+      return;
+    }
+    if (!isGitHubInput) {
+      setErrorMessage('仅支持 GitHub 仓库地址，如 https://github.com/owner/repo');
+      return;
+    }
     if (requestingRef.current) return;
     requestingRef.current = true;
     setLoading(true);
@@ -823,14 +834,21 @@ export default function App() {
     const loadingStart = Date.now();
     const minLoadingMs = 1800;
     try {
-      const body = { repoUrl: trimmed };
+      const body = { repoUrl: repoUrlCandidate };
       const response = await fetch(`${API_BASE}/api/oracle`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(body),
       });
-      const result = await response.json();
-      if (!response.ok) throw new Error(result.details || result.error || `请求失败 ${response.status}`);
+      const text = await response.text();
+      let result: Record<string, unknown>;
+      try {
+        result = text ? JSON.parse(text) : {};
+      } catch {
+        if (!response.ok) throw new Error(`后端未响应或未启动 (${response.status})，请确认已运行 npm run server`);
+        throw new Error('返回数据解析失败');
+      }
+      if (!response.ok) throw new Error((result as { details?: string; error?: string }).details || (result as { details?: string; error?: string }).error || `请求失败 ${response.status}`);
       if (result.error) throw new Error(result.details || result.error);
 
       const elements = result.elements || {};
@@ -887,7 +905,9 @@ export default function App() {
       setShowResult(true);
     } catch (error: unknown) {
       console.error('演算失败:', error);
-      alert('演算失败：' + (error instanceof Error ? error.message : String(error)));
+      const msg = error instanceof Error ? error.message : String(error);
+      setErrorMessage('演算失败：' + msg);
+      alert('演算失败：' + msg);
     } finally {
       setLoading(false);
       requestingRef.current = false;
@@ -931,7 +951,7 @@ export default function App() {
                         }`}
                         placeholder="https://github.com/owner/repo"
                         value={productInfo}
-                        onChange={(e) => setProductInfo(e.target.value)}
+                        onChange={(e) => { setProductInfo(e.target.value); setErrorMessage(''); }}
                         autoFocus
                       />
                       {isGitHubInput && (
@@ -943,7 +963,11 @@ export default function App() {
                         </span>
                       )}
                     </div>
+                    {errorMessage && (
+                      <p className="mb-4 text-xs text-red-400" role="alert">{errorMessage}</p>
+                    )}
                     <button
+                      type="button"
                       onClick={startDivination}
                       className="w-full group relative overflow-hidden bg-white text-black py-4 px-6 text-xs font-bold tracking-widest hover:bg-gray-200 transition-colors flex items-center justify-center gap-2"
                     >

@@ -419,5 +419,9 @@ app.post('/api/oracle', async (req, res) => {
   }
 });
 
-// Vercel Serverless: 仅导出 app，由平台接管请求；禁止在此文件内调用 app.listen
+// Vercel Serverless: 导出 app 供平台调用；本地开发时启动监听
 export default app;
+if (typeof process !== 'undefined' && process.env.VERCEL !== '1') {
+  const PORT = process.env.PORT || 3001;
+  app.listen(PORT, () => console.log(`✅ 赛博后端 http://localhost:${PORT}`));
+}

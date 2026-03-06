@@ -4,6 +4,7 @@ node_modules/
 # Build output
 dist/
 build/
+*.tsbuildinfo
 
 # Environment and secrets (never commit API keys)
 .env
