@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "vite build && echo '--- BUILD FINISHED ---' && ls -R",
+    "build": "vite build",
     "preview": "vite preview"
   },
   "dependencies": {
@@ -16,7 +16,10 @@
     "@react-three/drei": "^9.88.11",
     "lucide-react": "^0.344.0",
     "framer-motion": "^11.0.8",
-    "axios": "^1.6.7"
+    "axios": "^1.6.7",
+    "express": "^4.18.3",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5"
   },
   "devDependencies": {
     "@types/react": "^18.2.66",
