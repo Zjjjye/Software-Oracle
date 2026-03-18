@@ -6,28 +6,31 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "server": "node api/index.js"
   },
   "dependencies": {
+    "@react-three/drei": "^9.88.11",
+    "@react-three/fiber": "^8.15.11",
+    "axios": "^1.6.7",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
+    "express": "^4.18.3",
+    "framer-motion": "^11.0.8",
+    "html2canvas": "^1.4.1",
+    "lucide-react": "^0.344.0",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
-    "three": "^0.160.0",
-    "@react-three/fiber": "^8.15.11",
-    "@react-three/drei": "^9.88.11",
-    "lucide-react": "^0.344.0",
-    "framer-motion": "^11.0.8",
-    "axios": "^1.6.7",
-    "express": "^4.18.3",
-    "cors": "^2.8.5",
-    "dotenv": "^16.4.5"
+    "three": "^0.160.0"
   },
   "devDependencies": {
+    "@types/html2canvas": "^0.5.35",
     "@types/react": "^18.2.66",
     "@types/react-dom": "^18.2.22",
     "@vitejs/plugin-react": "^4.2.1",
-    "vite": "^5.2.2",
-    "tailwindcss": "^3.4.1",
+    "autoprefixer": "^10.4.18",
     "postcss": "^8.4.35",
-    "autoprefixer": "^10.4.18"
+    "tailwindcss": "^3.4.1",
+    "vite": "^5.2.2"
   }
 }

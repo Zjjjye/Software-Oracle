@@ -2,8 +2,9 @@ import React, { useState, useRef, useMemo, useEffect } from 'react';
 import { Canvas, useFrame } from '@react-three/fiber';
 import { OrbitControls, Float, Stars, Environment } from '@react-three/drei';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Loader2, ArrowRight, Github, Sparkles } from 'lucide-react';
+import { Loader2, ArrowRight, Github, Sparkles, Share2 } from 'lucide-react';
 import * as THREE from 'three';
+import ShareCard from './components/ShareCard';
 
 // --- Types ---
 interface AnalysisItem {
@@ -798,6 +799,7 @@ export default function App() {
   const [showResult, setShowResult] = useState(false);
   const [loadingMessage, setLoadingMessage] = useState(0);
   const [errorMessage, setErrorMessage] = useState('');
+  const [showShareCard, setShowShareCard] = useState(false);
   const requestingRef = useRef(false);
 
   const normalizedInput = productInfo.trim().replace(/^\/\//, 'https://');
@@ -811,23 +813,35 @@ export default function App() {
   ];
 
   useEffect(() => {
+    console.log('App 组件已挂载/更新');
+    // Ensure request state is reset on mount (in case of hot reload weirdness)
+    requestingRef.current = false;
+  }, []);
+
+  useEffect(() => {
     if (!loading) return;
     const id = setInterval(() => setLoadingMessage((i) => (i + 1) % 3), 2500);
     return () => clearInterval(id);
   }, [loading]);
 
   const startDivination = async () => {
+    console.log('开始占卜流程启动...');
     setErrorMessage('');
     const trimmed = productInfo.trim();
     if (!trimmed) {
+      console.warn('输入为空');
       setErrorMessage('请输入 GitHub 仓库地址');
       return;
     }
     if (!isGitHubInput) {
+      console.warn('输入格式错误:', trimmed);
       setErrorMessage('仅支持 GitHub 仓库地址，如 https://github.com/owner/repo');
       return;
     }
-    if (requestingRef.current) return;
+    if (requestingRef.current) {
+      console.warn('请求正在进行中，忽略点击');
+      return;
+    }
     requestingRef.current = true;
     setLoading(true);
     setShowResult(false);
@@ -835,7 +849,7 @@ export default function App() {
     const minLoadingMs = 1800;
     try {
       const body = { repoUrl: repoUrlCandidate };
-      const response = await fetch(`${API_BASE}/api/oracle`, {
+      const response = await fetch('/api/oracle', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(body),
@@ -1010,7 +1024,14 @@ export default function App() {
             <main className="flex-1 grid grid-cols-12 min-h-0 w-full">
               <aside className="col-span-4 flex flex-col min-h-0 border-r border-white/10 bg-[#050505]">
                 <LeftDashboard data={data} showResult={true} isCalculating={false} />
-                <div className="flex-shrink-0 p-4 border-t border-white/10">
+                <div className="flex-shrink-0 p-4 border-t border-white/10 flex flex-col gap-2">
+                  <button
+                    onClick={() => setShowShareCard(true)}
+                    className="w-full py-3 bg-white/5 border border-yellow-500/30 text-yellow-500 hover:bg-yellow-500/10 transition-colors text-[10px] tracking-widest flex items-center justify-center gap-2"
+                  >
+                    <Share2 size={12} />
+                    生成灵符 / SAVE CHARM
+                  </button>
                   <button
                     onClick={reset}
                     className="w-full py-3 border border-white/20 text-[10px] tracking-widest hover:bg-white hover:text-black transition-colors"
@@ -1031,6 +1052,16 @@ export default function App() {
               </aside>
             </main>
           </div>
+        )}
+
+        {/* Share Card Modal */}
+        {showShareCard && data && (
+          <ShareCard
+            data={data}
+            repoUrl={productInfo}
+            isOpen={showShareCard}
+            onClose={() => setShowShareCard(false)}
+          />
         )}
       </AnimatePresence>
     </div>

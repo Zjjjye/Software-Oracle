@@ -236,7 +236,7 @@ app.post('/api/oracle', async (req, res) => {
   "innate_elements": { "metal": 0.6, "wood": 0.1, "water": 0.1, "fire": 0.1, "earth": 0.1 },
   "acquired_elements": { "metal": 0.3, "wood": 0.2, "water": 0.2, "fire": 0.2, "earth": 0.1 },
   "elements": { "metal": 0.44, "wood": 0.16, "water": 0.16, "fire": 0.16, "earth": 0.1 },
-  "hexagram": "卦象名",
+  "hexagram": "卦象名（必须根据本仓库五行与因果综合唯一推导，如雷火丰、天山遁、乾为天、坤为地、离为火等，禁止所有仓库都输出震卦）",
   "judgment": "判词",
   "analysis": [
     { "metric": "...", "element": "金|木|水|火|土", "reason": "现实影响与建议", "logic_chain": "【原始数据】如 Stars N + pushed_at 某日 → 命理象（如火旺/墓库）→ 现实含义" }
@@ -249,7 +249,8 @@ app.post('/api/oracle', async (req, res) => {
 
 四、失衡点与生命周期
 - 仍须根据数据判断金木相战、水火既济、火多土焦、土多金埋等，且每条都写 logic_chain。
-- 生命周期阶段（created_at 决定）：<6月 萌芽期/震卦；1–3年 壮大期/乾卦；>5年 宿命期/坤卦。判词与 analysis 须与阶段匹配。
+- 生命周期阶段（created_at 决定）：<6月 萌芽期；1–3年 壮大期；>5年 宿命期。该阶段仅用于判词与 analysis 的语境参考，**不要**用生命周期直接决定输出的 hexagram。
+- **hexagram 规则（强制）**：输出的 hexagram 必须是「根据本仓库的 elements、因果、判词综合得出的卦象名」，例如雷火丰、天山遁、乾为天、坤为地、离为火、坎为水、震为雷、巽为风、艮为山、兑为泽等。不同仓库必须得到不同的卦象，禁止对所有仓库统一输出震卦或同一卦象。
 `.trim();
 
     const location = typeof req.body?.location === 'string' ? req.body.location.trim() : '';
